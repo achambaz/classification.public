@@ -20,7 +20,9 @@ l'Université Paris Descartes. Elles incluent des portions de code `R`.
 
 ## Liens
 
-[Introduction](https://github.com/achambaz/classification.develop/blob/master/introduction/introduction.md)
+[Introduction](https://github.com/achambaz/classification.public/blob/master/introduction/introduction.md)
+
+
 
 ---
 
