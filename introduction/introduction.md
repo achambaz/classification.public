@@ -3,11 +3,26 @@ Introduction
 Antoine Chambaz
 25/9/2017
 
+Les concepts
+------------
+
+-   Reproductibilité
+
+-   Interprétation algorithmique de l'entreprise de classification
+
+-   Ensembles d'apprentissage et de validation
+
+-   Validation croisée pour l'évaluation honnête et la comparaison des performances
+
+-   Visualisation d'un classifieur et de ses performances
+
+-   Algorithmes de classification selon les *k* plus proches voisins et selon les voisins pondérés
+
 Une introduction à la classification selon les plus proches voisins
 -------------------------------------------------------------------
 
 ``` r
-set.seed(54321) ## reproductibilité...
+set.seed(54321)
 ```
 
 ### Les données «iris»
