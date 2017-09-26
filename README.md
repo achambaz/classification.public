@@ -1,20 +1,19 @@
-# classification.develop
+# laviemodedemploi.public
 
 [![MIT
 license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-> Classification, notes de cours (version publique)
+> &laquo;La vie mode d'emploi&raquo;, notes de cours (version publique)
 
 ---
 
 ## Description
 
-Vous trouverez  ici des notes de  cours résumant brièvement le  déroulement du
-cours  intitulé  *Classification*  de la  spécialité  &laquo;Mathématiques  et
-modélisation&raquo;
-du
-[Master &laquo;Mathématiques et applications&raquo;](http://www.mi.parisdescartes.fr/formations/master-mathematiques-et-applications/) de
-l'Université Paris Descartes. Elles incluent des portions de code `R`.
+Vous trouverez ici des notes de cours que j'utilise dans le cadre de mes cours
+de   master  spécialités   &laquo;Mathématiques   et  modélisation&raquo;   et
+&laquo;Ingénierie  mathématique&raquo;  du   [Master  &laquo;Mathématiques  et
+applications&raquo;](http://www.mi.parisdescartes.fr/formations/master-mathematiques-et-applications/)
+de l'Université Paris Descartes. Elles incluent des portions de code `R`.
 
 ---
 
@@ -22,7 +21,7 @@ l'Université Paris Descartes. Elles incluent des portions de code `R`.
 
 [Introduction](https://github.com/achambaz/classification.public/blob/master/introduction/introduction.md)
 
-
+[Fluctuation](https://github.com/achambaz/classification.public/blob/master/fluctuation/fluctuation.md)
 
 ---
 
