@@ -1,7 +1,7 @@
 ---
 title: "Fluctuation"
 author: "Antoine Chambaz"
-date: "25/9/2017"
+date: "26/9/2017"
 encoding: "UTF-8"
 output:
   github_document:
@@ -30,7 +30,33 @@ knitr::opts_chunk$set(
 
 ```{r preliminary}
 set.seed(54321)
+library(R.utils)
 ```
 
-### La loi&hellip;
+### La loi&hellip; 
 
+* Considérons  la loi  $P_{0}$ suivante,  qui produit  des observations  de la
+  forme $O=(X,Y) \in \mathbb{R}^{2} \times \mathbb{R}$.
+
+```{r the_law}
+drawFromPzero <- function(nobs) {
+  nobs <- Arguments$getInteger(nobs, c(1, Inf))
+  X <- cbind(runif(nobs), rnorm(nobs))
+  QY <- function(xx) {
+    cos(2*pi*xx[, 1]) + xx[, 2] + xx[, 2]^2/2
+  }
+  Y <- rnorm(QY(X), 1)
+  dat <- cbind(X, Y)
+  colnames(dat) <- c("X1", "X2", "Y")
+  attr(dat, "QY") <- QY
+  return(dat)
+}
+drawFromPzero(5)
+```
+
+* Considérons par exemple la direction $s$ définie ainsi:
+
+```{r the_direction}
+s <- function(obs) {
+}
+```
