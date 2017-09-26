@@ -18,21 +18,22 @@ knitr::opts_chunk$set(
 ```
 
 
-## Les concepts
+## Les notions
 
-* Reproductibilité
+* Algorithmes de classification selon les $k$ plus proches voisins et selon
+  les voisins pondérés
+
+* Ensembles d'apprentissage et de validation
 
 * Interprétation algorithmique de l'entreprise de classification
 
-* Ensembles d'apprentissage et de validation
+* Reproductibilité
 
 * Validation  croisée  pour  l'évaluation   honnête  et  la  comparaison  des
   performances
 
 * Visualisation d'un classifieur et de ses performances
   
-* Algorithmes de classification selon les $k$ plus proches voisins et selon
-  les voisins pondérés
 
 ## Une introduction à la classification selon les plus proches voisins
 
