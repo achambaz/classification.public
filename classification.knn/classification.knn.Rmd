@@ -96,4 +96,4 @@ pairs(iris.test[1:4], pch = pcol, col = c("green3", "red")
 pairs(iris.test[1:4], pch = pcol, col = c("green3", "red")
 [(iris.test$Species != test.preds.knn)+1])
 ```
-[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi.develop#liens)
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
