@@ -25,8 +25,6 @@ Une introduction à la classification selon les plus proches voisins
 set.seed(54321)
 ```
 
-### Les données «iris»
-
 -   Préparatifs:
 
 ``` r
@@ -128,4 +126,4 @@ tune.knn(iris.train[, -species.col], iris.train[, species.col], k = 1:20)
     ## 
     ## - best performance: 0.01
 
-[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi.develop#liens)

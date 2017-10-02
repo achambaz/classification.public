@@ -1,0 +1,156 @@
+---
+title: "Classification par analyse discriminante"
+author: "Antoine Chambaz"
+date: "1/10/2017"
+encoding: "UTF-8"
+output:
+  github_document:
+  toc: yes
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(
+    warnings = FALSE,
+	fig.width = 12, 
+	fig.height = 4, 
+	fig.path = 'img/'
+)
+```
+
+
+## Les notions
+
+* Algorithmes de classification par analyse discriminante
+
+* Courbes ROC
+
+* Ensembles d'apprentissage et de validation
+
+* Enrichissement de données
+
+* Interprétation algorithmique de l'entreprise de classification
+
+* Reproductibilité
+
+* Validation  croisée  pour  l'évaluation   honnête  et  la  comparaison  des
+  performances
+
+* Visualisation d'un classifieur et de ses performances
+  
+
+## Une introduction à la classification par analyse discriminante
+
+```{r preliminary}
+set.seed(54321)
+```
+
+* Mises  à disposition par  Météo France, ces  données sont extraites  du site
+[wikistat](https://github.com/wikistat). Nous souhaitons  apprendre à prédire,
+à partir  des données du  jour, un  dépassement du seuil  de 150 &mu;g  par la
+concentration d'ozone le lendemain.
+
+
+```{r load_ozone}
+file <- file.path("http://www.math.univ-toulouse.fr/~besse/Wikistat/data", "depSeuil.dat")
+ozone <- read.table(file, sep = ",", header = TRUE)
+
+## JOUR: jour férié (1) ou pas (0)
+## O3obs: concentration d'ozone effectivement observée le lendemain à 17h locales (correspond souvent au maximum de pollution observée)
+## MOCAGE: prévision de cette pollution obtenue par un modèle déterministe de mécanique des fluides
+## TEMPE: température prévue par Météo France pour le lendemain 17h
+## RMH2O: rapport d'humidité
+## NO2: concentration en dioxyde d'azote
+## NO: concentration en monoxyde d'azote
+## STATION: lieu de l'observation (Aix-en-Provence, Rambouillet, Munchhausen, Cadarache et Plan de Cuques)
+## VentMOD: force du vent
+## VentANG: orientation du vent
+
+ozone[, "JOUR"] <- as.factor(ozone[, "JOUR"])
+ozone[, "SRMH2O"] <- sqrt(ozone[, "RMH2O"])
+ozone[, "LNO2"] <- log(ozone[, "NO2"])
+ozone[, "LNO"] <- log(ozone[,"NO"])
+ozone[, "DEPSEUIL"] <- as.factor(ozone[, "O3obs"] > 150)
+
+head(ozone)
+```
+
+* Pourquoi ces transformations?
+
+```{r histo-un}
+par(mfrow=c(2, 2))
+options(repr.plot.width = 6, repr.plot.height = 6)
+hist(ozone[, "RMH2O"], xlab = "RMH2O", main = "Rapport d'humidité")
+hist(ozone[, "NO2"],  xlab = "NO2",  main = "Concentration en  N2O")
+hist(ozone[, "SRMH2O"], xlab = "SRMH2O", main = "Racine carrée du rapport d'humidité")
+hist(ozone[, "LNO2"], xlab = "LNO2", main = "Log-concentration en N2O")
+
+remove <- which(names(ozone) %in% c("RMH2O", "NO2", "NO", "O3obs"))
+ozone <- ozone[, -remove]
+depseuil.col <- grep("DEPSEUIL", names(ozone))
+
+m <- nrow(ozone)
+val <- sample(1:m, size = round(m/3), replace = FALSE, prob = rep(1/m, m)) 
+ozone.train <- ozone[-val, ]
+ozone.test <- ozone[val, ]
+```
+
+* Classification par analyse discriminante _linéaire_.
+
+```{r lda}
+suppressMessages(library(MASS))
+trained.lda <- lda(DEPSEUIL ~ ., ozone.train)
+test.lda <- predict(trained.lda, ozone.test)
+lapply(test.lda, head)
+perf.lda <- table(test.lda$class, ozone.test[, depseuil.col])
+perf.lda
+```
+
+* Classification par analyse discriminante _quadratique_.
+
+```{r qda}
+trained.qda <- qda(DEPSEUIL ~ ., ozone.train)
+test.qda <- predict(trained.qda, ozone.test)
+lapply(test.qda, head)
+perf.qda <- table(test.qda$class, ozone.test[, depseuil.col])
+perf.qda
+```
+
+* Classification par analyse discriminante _régularisée_.
+
+```{r rda}
+suppressMessages(library(rda))
+remove <- which(names(ozone.train) %in% c("JOUR", "STATION", "DEPSEUIL"))
+ozone.train.rda <- ozone.train[, -remove]
+above <- as.logical(ozone.train[, depseuil.col])
+ozone.train.rda <- t(rbind(ozone.train.rda[!above, ], ozone.train.rda[above, ]))
+ozone.class.rda <- c(rep(1, sum(!above)), rep(2, sum(above)))
+ozone.test.rda <- t(ozone.test[, -remove])
+
+trained.rda <- rda(x = ozone.train.rda, y = ozone.class.rda)
+
+test.rda <- predict(trained.rda, x = ozone.train.rda, y = ozone.class.rda, 
+                    xnew = ozone.test.rda, alpha=0.1, delta=0.5)
+## better: use 'rda.cv'
+
+perf.rda <- table(test.rda, ozone.test[, depseuil.col])
+perf.rda
+```
+
+
+* Courbes ROC.
+
+```{r ROC}
+suppressMessages(library(ROCR))
+pred.lda <- prediction(test.lda$posterior[, 2], ozone.test[, depseuil.col])
+roc.lda <- performance(pred.lda, "tpr", "fpr")
+
+pred.qda <- prediction(test.qda$posterior[, 2], ozone.test[, depseuil.col])
+roc.qda <- performance(pred.qda, "tpr", "fpr")
+
+plot(roc.lda, col = "blue") 
+plot(roc.qda, col = "red", add = TRUE)
+legend(x = "bottomright", legend = c("lda", "qda"), col = c("blue", "red"), pch = c(21, 21))
+```
+
+
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi.develop#liens)

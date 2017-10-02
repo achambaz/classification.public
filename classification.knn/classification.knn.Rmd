@@ -41,8 +41,6 @@ knitr::opts_chunk$set(
 set.seed(54321)
 ```
 
-### Les données &laquo;iris&raquo;
-
 * Préparatifs:
 
 ```{r load_iris}
