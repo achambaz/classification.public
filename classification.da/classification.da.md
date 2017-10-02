@@ -209,4 +209,4 @@ legend(x = "bottomright", legend = c("lda", "qda"), col = c("blue", "red"), pch 
 
 ![](img/ROC-1.png)
 
-[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi.develop#liens)
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)

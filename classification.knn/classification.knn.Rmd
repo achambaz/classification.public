@@ -102,4 +102,4 @@ library(e1071)
 tune.knn(iris.train[, -species.col], iris.train[, species.col], k = 1:20)
 ```
 
-[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi.develop#liens)
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
