@@ -110,4 +110,22 @@ pairs(iris.test[1:4], pch = pcol, col = c("green3", "red")
 
 ![](img/visualisation-2.png)
 
-[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
+-   Sélection d'un nombre de voisins optimal par validation croisée.
+
+``` r
+library(e1071)
+tune.knn(iris.train[, -species.col], iris.train[, species.col], k = 1:20)
+```
+
+    ## 
+    ## Parameter tuning of 'knn.wrapper':
+    ## 
+    ## - sampling method: 10-fold cross validation 
+    ## 
+    ## - best parameters:
+    ##  k
+    ##  1
+    ## 
+    ## - best performance: 0.01
+
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi.develop#liens)
