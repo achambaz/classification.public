@@ -3,7 +3,7 @@
 [![MIT
 license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-> &laquo;La vie mode d'emploi&raquo;, notes de cours (version développement)
+> &laquo;La vie mode d'emploi&raquo;, notes de cours
 
 ---
 
