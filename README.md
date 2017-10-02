@@ -19,7 +19,7 @@ de l'Université Paris Descartes. Elles incluent des portions de code `R`.
 
 ## Liens
 
-Classification par analyse discriminante&hellip;
+[Classification par analyse discriminante](https://github.com/achambaz/laviemodedemploi/blob/master/classification.da/classification.da.md)
 
 [Classification selon les plus proches voisins](https://github.com/achambaz/laviemodedemploi/blob/master/classification.knn/classification.knn.md)
 
