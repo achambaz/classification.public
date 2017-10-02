@@ -109,3 +109,5 @@ pairs(iris.test[1:4], pch = pcol, col = c("green3", "red")
 ```
 
 ![](img/visualisation-2.png)
+
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)

@@ -60,3 +60,5 @@ drawFromPzero(5)
 s <- function(obs) {
 }
 ```
+
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)

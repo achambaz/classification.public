@@ -51,5 +51,14 @@ drawFromPzero(5)
     ## {
     ##     cos(2 * pi * xx[, 1]) + xx[, 2] + xx[, 2]^2/2
     ## }
-    ## <bytecode: 0x3712f80>
-    ## <environment: 0x48f33e8>
+    ## <bytecode: 0x41dfa58>
+    ## <environment: 0x463d840>
+
+-   Considérons par exemple la direction *s* définie ainsi:
+
+``` r
+s <- function(obs) {
+}
+```
+
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
