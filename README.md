@@ -1,9 +1,9 @@
-# laviemodedemploi.public
+# laviemodedemploi
 
 [![MIT
 license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-> &laquo;La vie mode d'emploi&raquo;, notes de cours (version publique)
+> &laquo;La vie mode d'emploi&raquo;, notes de cours
 
 ---
 
@@ -19,7 +19,7 @@ de l'Université Paris Descartes. Elles incluent des portions de code `R`.
 
 ## Liens
 
-[Introduction](https://github.com/achambaz/classification.public/blob/master/introduction/introduction.md)
+[Classification selon les plus proches voisins](https://github.com/achambaz/classification.public/blob/master/introduction/introduction.md)
 
 [Fluctuation](https://github.com/achambaz/classification.public/blob/master/fluctuation/fluctuation.md)
 
