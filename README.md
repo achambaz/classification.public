@@ -3,7 +3,7 @@
 [![MIT
 license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-> &laquo;La vie mode d'emploi&raquo;, notes de cours
+> &laquo;La vie mode d'emploi&raquo;, notes de cours (version développement)
 
 ---
 
@@ -18,6 +18,8 @@ de l'Université Paris Descartes. Elles incluent des portions de code `R`.
 ---
 
 ## Liens
+
+Classification par analyse discriminante&hellip;
 
 [Classification selon les plus proches voisins](https://github.com/achambaz/laviemodedemploi/blob/master/classification.knn/classification.knn.md)
 
