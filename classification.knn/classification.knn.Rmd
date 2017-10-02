@@ -1,5 +1,5 @@
 ---
-title: "Introduction"
+title: "Classification selon les plus proches voisins"
 author: "Antoine Chambaz"
 date: "25/9/2017"
 encoding: "UTF-8"
@@ -48,6 +48,7 @@ set.seed(54321)
 ```{r load_iris}
 suppressMessages(library(caret))
 data(iris)
+head(iris)
 species.col <- grep("Species", colnames(iris))
 m <- nrow(iris)
 val <- sample(1:m, size = round(m/3), replace = FALSE, prob = rep(1/m, m)) 
@@ -55,7 +56,7 @@ iris.train <- iris[-val, ]
 iris.test <- iris[val, ]
 ```
 
-* Pour obtenir une description du jeu de données, exécuter `?iris`.
+* Pour  obtenir une description du  jeu de données, exécuter  `?iris`. 
 
 ```{r knn}
 nb.neighbors <- 4
@@ -95,3 +96,4 @@ pairs(iris.test[1:4], pch = pcol, col = c("green3", "red")
 pairs(iris.test[1:4], pch = pcol, col = c("green3", "red")
 [(iris.test$Species != test.preds.knn)+1])
 ```
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi.develop#liens)
