@@ -101,7 +101,7 @@ suppressMessages(library(MASS))
 trained.lda <- lda(DEPSEUIL ~ ., ozone.train)
 test.lda <- predict(trained.lda, ozone.test)
 lapply(test.lda, head)
-perf.lda <- table(test.lda$class, ozone.test[, depseuil.col])
+perf.lda <- table(test.lda$class, ozone.test[, depseuil.col], dnn = list("pred", "truth"))
 perf.lda
 ```
 
@@ -111,7 +111,7 @@ perf.lda
 trained.qda <- qda(DEPSEUIL ~ ., ozone.train)
 test.qda <- predict(trained.qda, ozone.test)
 lapply(test.qda, head)
-perf.qda <- table(test.qda$class, ozone.test[, depseuil.col])
+perf.qda <- table(test.qda$class, ozone.test[, depseuil.col], dnn = list("pred", "truth"))
 perf.qda
 ```
 
@@ -132,7 +132,7 @@ test.rda <- predict(trained.rda, x = ozone.train.rda, y = ozone.class.rda,
                     xnew = ozone.test.rda, alpha=0.1, delta=0.5)
 ## better: use 'rda.cv'
 
-perf.rda <- table(test.rda, ozone.test[, depseuil.col])
+perf.rda <- table(test.rda, ozone.test[, depseuil.col], dnn = list("pred", "truth"))
 perf.rda
 ```
 

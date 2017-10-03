@@ -61,7 +61,7 @@ nb.neighbors <- 4
 trained.knn <- knn3(Species ~ ., iris.train, k = nb.neighbors)
 test.probs.knn <- predict(trained.knn, iris.test)
 test.preds.knn <- colnames(test.probs.knn)[apply(test.probs.knn, 1, which.max)]
-perf.knn <- table(test.preds.knn, iris.test[, species.col])
+perf.knn <- table(test.preds.knn, iris.test[, species.col], dnn = list("pred", "truth"))
 perf.knn
 ```
 
@@ -79,7 +79,7 @@ trained.kknn <- kknn(Species~., iris.train, iris.test, distance = 1,
 
 ```{r knn_suite}
 test.preds.kknn <- fitted(trained.kknn)
-perf.kknn <- table(iris.test$Species, test.preds.kknn)
+perf.kknn <- table(iris.test$Species, test.preds.kknn, dnn = list("pred", "truth"))
 perf.kknn
 ```
 
@@ -100,6 +100,71 @@ pairs(iris.test[1:4], pch = pcol, col = c("green3", "red")
 ```{r fine-tune}
 library(e1071)
 tune.knn(iris.train[, -species.col], iris.train[, species.col], k = 1:20)
+```
+
+## Sur suggestion de la classe (2017-2018)&hellip;
+
+* Il arrive qu'un classifieur selon les plus proches voisins hésite entre deux
+  classes   (ou  plus)   &ndash;  cela   survient  lorsque   les  probabilités
+  conditionnelles estimées d'appartenir  à deux classes (ou  plus) sont égales
+  et   maximales.   Inspiré   très  largement   de  l'algorithme   `knn3`,  le
+  méta-algorithme `knn4` codé et utilisé ci-dessous a pour objectif de réduire
+  le nombre d'occurrences de telles hésitations.
+  
+```{r knn4}
+knn4 <- function(formula, data, kk = 2:5){
+  ##
+  ## see 'getAnywhere(knn3.formula)'
+  ##
+  if (length(kk) == 1) {
+    out <- knn3(formula, data, k = kk)
+  } else {
+    FUN <- function(xx, ...){
+      knn3(k = xx, ...)
+    }
+    out <- lapply(kk, FUN, formula, data)
+  }
+  class(out) <- "knn4"
+  return(out)
+}
+
+predict.knn4 <- function(object, newdata) {
+  FUN <- function (ii, xx){
+    ## tests if the argmax is uniquely achieved
+    m <- max(xx[ii, ])
+    w <- which(xx[ii, ] == m)
+    length(w) == 1
+  }
+  kk <- 1
+  pred <- predict(object[[kk]], newdata)
+  nk <- length(object)
+  if (nk > 1) {
+    done <- sapply(1:nrow(pred), FUN, pred)
+    if (any(!done) && (kk < nk)) {
+      kk <- kk + 1
+      newpred <- predict(object[[kk]], newdata[!done, ])
+      keep <- sapply(1:nrow(newpred), FUN, newpred)
+      if (any(keep)) {
+        if (sum(!done) == 1) {
+          pred[!done] <- newpred[keep]
+        } else {
+          pred[!done, ][keep, ] <- newpred[keep, ]
+        }
+      }
+      done[!done][keep] <- TRUE
+    }
+    if (any(!done)) {
+      pred[!done, ] <- newpred[!keep]
+    }
+  }
+  return(pred)
+}
+
+trained.knn4 <- knn4(Species ~ ., iris.train, kk = c(3, 6, 9))
+test.probs.knn4 <- predict(trained.knn4, iris.test)
+test.preds.knn4 <- colnames(test.probs.knn4)[apply(test.probs.knn4, 1, which.max)]
+perf.knn4 <- table(test.preds.knn4, iris.test[, species.col], dnn = list("pred", "truth"))
+perf.knn4
 ```
 
 [Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)

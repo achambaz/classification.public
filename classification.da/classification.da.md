@@ -126,12 +126,12 @@ lapply(test.lda, head)
     ## 904  1.4815757
 
 ``` r
-perf.lda <- table(test.lda$class, ozone.test[, depseuil.col])
+perf.lda <- table(test.lda$class, ozone.test[, depseuil.col], dnn = list("pred", "truth"))
 perf.lda
 ```
 
-    ##        
-    ##         FALSE TRUE
+    ##        truth
+    ## pred    FALSE TRUE
     ##   FALSE   289   23
     ##   TRUE      5   30
 
@@ -157,12 +157,12 @@ lapply(test.qda, head)
     ## 904 0.06226223 9.377378e-01
 
 ``` r
-perf.qda <- table(test.qda$class, ozone.test[, depseuil.col])
+perf.qda <- table(test.qda$class, ozone.test[, depseuil.col], dnn = list("pred", "truth"))
 perf.qda
 ```
 
-    ##        
-    ##         FALSE TRUE
+    ##        truth
+    ## pred    FALSE TRUE
     ##   FALSE   271   18
     ##   TRUE     23   35
 
@@ -183,14 +183,14 @@ test.rda <- predict(trained.rda, x = ozone.train.rda, y = ozone.class.rda,
                     xnew = ozone.test.rda, alpha=0.1, delta=0.5)
 ## better: use 'rda.cv'
 
-perf.rda <- table(test.rda, ozone.test[, depseuil.col])
+perf.rda <- table(test.rda, ozone.test[, depseuil.col], dnn = list("pred", "truth"))
 perf.rda
 ```
 
-    ##         
-    ## test.rda FALSE TRUE
-    ##        1   239   14
-    ##        2    55   39
+    ##     truth
+    ## pred FALSE TRUE
+    ##    1   239   14
+    ##    2    55   39
 
 -   Courbes ROC.
 
