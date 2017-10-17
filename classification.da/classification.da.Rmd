@@ -10,10 +10,10 @@ output:
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
-    warnings = FALSE,
-	fig.width = 12, 
-	fig.height = 4, 
-	fig.path = 'img/'
+  warnings = FALSE,
+  fig.width = 12, 
+  fig.height = 4, 
+  fig.path = 'img/'
 )
 ```
 
