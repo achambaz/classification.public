@@ -22,6 +22,11 @@ Les notions
 
 -   Visualisation d'un classifieur et de ses performances
 
+Fichier source
+--------------
+
+Afin d'extraire les portions de code `R` du fichier source [`classification.da.Rmd`](https://github.com/achambaz/laviemodedemploi/blob/master/classification.da/classification.da.Rmd), il suffit d'exécuter dans `R` la commande `knitr::purl("classification.da.Rmd")`.
+
 Une introduction à la classification par analyse discriminante
 --------------------------------------------------------------
 
@@ -181,6 +186,10 @@ trained.rda <- rda(x = ozone.train.rda, y = ozone.class.rda)
 
 test.rda <- predict(trained.rda, x = ozone.train.rda, y = ozone.class.rda, 
                     xnew = ozone.test.rda, alpha=0.1, delta=0.5)
+test.rda.posterior <- predict(trained.rda, x = ozone.train.rda, y = ozone.class.rda, 
+                              xnew = ozone.test.rda, alpha=0.1, delta=0.5,
+                              type = "posterior")
+
 ## better: use 'rda.cv'
 
 perf.rda <- table(test.rda, ozone.test[, depseuil.col], dnn = list("pred", "truth"))
@@ -202,9 +211,14 @@ roc.lda <- performance(pred.lda, "tpr", "fpr")
 pred.qda <- prediction(test.qda$posterior[, 2], ozone.test[, depseuil.col])
 roc.qda <- performance(pred.qda, "tpr", "fpr")
 
+pred.rda <- prediction(test.rda.posterior[, 2], ozone.test[, depseuil.col])
+roc.rda <- performance(pred.rda, "tpr", "fpr")
+
 plot(roc.lda, col = "blue") 
 plot(roc.qda, col = "red", add = TRUE)
-legend(x = "bottomright", legend = c("lda", "qda"), col = c("blue", "red"), pch = c(21, 21))
+plot(roc.qda, col = "purple", add = TRUE)
+legend(x = "bottomright", legend = c("lda", "qda", "rda"),
+       col = c("blue", "red","purple"), pch = c(21, 21, 21))
 ```
 
 ![](img/ROC-1.png)
