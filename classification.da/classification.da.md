@@ -216,7 +216,7 @@ roc.rda <- performance(pred.rda, "tpr", "fpr")
 
 plot(roc.lda, col = "blue") 
 plot(roc.qda, col = "red", add = TRUE)
-plot(roc.qda, col = "purple", add = TRUE)
+plot(roc.rda, col = "purple", add = TRUE)
 legend(x = "bottomright", legend = c("lda", "qda", "rda"),
        col = c("blue", "red","purple"), pch = c(21, 21, 21))
 ```
