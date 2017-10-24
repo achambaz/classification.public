@@ -17,7 +17,7 @@ Les notions
 Fichier source
 --------------
 
-Afin d'extraire les portions de code `R` du fichier source [`regression.xgboost.Rmd`](https://github.com/achambaz/laviemodedemploi.develop/blob/master/regression.xgboost/regression.xgboost.Rmd), il suffit d'exécuter dans `R` la commande `knitr::purl("regression.xgboost.Rmd")`.
+Afin d'extraire les portions de code `R` du fichier source [`regression.xgboost.Rmd`](https://github.com/achambaz/laviemodedemploi/blob/master/regression.xgboost/regression.xgboost.Rmd), il suffit d'exécuter dans `R` la commande `knitr::purl("regression.xgboost.Rmd")`.
 
 Préparation de la session `R`
 -----------------------------
@@ -309,8 +309,4 @@ results
     ## 10      15   0.1         6   1.373803  2.768126
     ## # ... with 62 more rows
 
-results &lt;- fits %&gt;% mutate( \# hyperparameters nrounds = map\_dbl(params, "nrounds"), eta = map\_dbl(params, "eta"), max\_depth = map\_dbl(params, "max\_depth"), \# Accuracy accuracy\_train = pmap\_dbl(list(fit, train, target), accuracy), accuracy\_test = pmap\_dbl(list(fit, test, target), accuracy) ) %&gt;% \# Select columns and order rows select(nrounds, eta, max\_depth, contains("accuracy")) %&gt;% arrange(desc(accuracy\_test), desc(accuracy\_train))
-
-results
-
-[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi.develop#liens)
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
