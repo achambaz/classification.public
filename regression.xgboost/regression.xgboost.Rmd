@@ -232,20 +232,5 @@ results
 
 ```
 
-results <- fits %>% 
-  mutate(
-    # hyperparameters
-    nrounds   = map_dbl(params, "nrounds"),
-    eta       = map_dbl(params, "eta"),
-    max_depth = map_dbl(params, "max_depth"),
-    # Accuracy
-    accuracy_train = pmap_dbl(list(fit, train, target), accuracy),
-    accuracy_test  = pmap_dbl(list(fit, test,  target), accuracy)
-  ) %>% 
-  # Select columns and order rows
-  select(nrounds, eta, max_depth, contains("accuracy")) %>% 
-  arrange(desc(accuracy_test), desc(accuracy_train))
-
-results
 
 [Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
