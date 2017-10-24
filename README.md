@@ -19,11 +19,17 @@ de l'Université Paris Descartes. Elles incluent des portions de code `R`.
 
 ## Liens
 
+A ce jour, les notes suivantes sont disponibles:
+
 [Classification par analyse discriminante](https://github.com/achambaz/laviemodedemploi/blob/master/classification.da/classification.da.md)
 
 [Classification selon les plus proches voisins](https://github.com/achambaz/laviemodedemploi/blob/master/classification.knn/classification.knn.md)
 
 [Fluctuation](https://github.com/achambaz/laviemodedemploi/blob/master/fluctuation/fluctuation.md)
+
+[Régression `xgboost`](https://github.com/achambaz/laviemodedemploi/blob/master/regression.xgboost/regression.xgboost.md)
+
+Chaque note débute par une énumération des notions discutées. 
 
 ---
 

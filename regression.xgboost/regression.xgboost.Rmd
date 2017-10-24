@@ -1,0 +1,251 @@
+---
+title: "Régression 'xgboost'"
+author: "Antoine Chambaz"
+date: "23/10/2017"
+encoding: "UTF-8"
+output:
+  github_document:
+  toc: yes
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(
+    warnings = FALSE,
+	fig.width = 12, 
+	fig.height = 4, 
+	fig.path = 'img/'
+)
+```
+
+
+## Les notions
+
+* Algorithme de régression `xgboost`.
+
+* Ensembles d'apprentissage et de validation
+
+* 'Machine-learning pipelines'
+
+* Reproductibilité
+
+
+## Fichier source
+
+Afin   d'extraire   les    portions   de   code   `R`    du   fichier   source
+[`regression.xgboost.Rmd`](https://github.com/achambaz/laviemodedemploi/blob/master/regression.xgboost/regression.xgboost.Rmd),
+il       suffit       d'exécuter        dans       `R`       la       commande
+`knitr::purl("regression.xgboost.Rmd")`.
+
+## Préparation de la session `R`
+
+```{r session:one, eval = FALSE}
+pkgs <- c("xgboost", "tidyverse", "devtools")
+for (pkg in pkgs) {
+  if (! (pkg %in% rownames(installed.packages()))) {
+    install.packages(pkg)
+  }
+}
+pkg <- "pipelearner"
+if (! (pkg %in% rownames(installed.packages()))) {
+  devtools::install_github("drsimonj/pipelearner")
+}
+```
+
+```{r session:two}
+suppressMessages(library(tidyverse))
+suppressMessages(library(lazyeval))
+```
+
+## Une introduction à la régression par 'xgboost'
+
+```{r preliminary}
+set.seed(54321)
+```
+
+* Mises  à disposition par  Météo France, ces  données sont extraites  du site
+[wikistat](https://github.com/wikistat). Nous souhaitons  apprendre à prédire,
+à partir des données du jour, la concentration d'ozone le lendemain.
+
+```{r load_ozone}
+one_hot <- function(df) {
+  as_tibble(stats::model.matrix(~.+0, data = df))
+}
+
+file <- file.path("http://www.math.univ-toulouse.fr/~besse/Wikistat/data", "depSeuil.dat")
+ozone <- read_csv(file, col_names = TRUE) %>% one_hot %>% mutate_all(as.numeric)
+
+## JOUR: jour férié (1) ou pas (0)
+## O3obs: concentration d'ozone effectivement observée le lendemain à 17h locales (correspond souvent au maximum de pollution observée)
+## MOCAGE: prévision de cette pollution obtenue par un modèle déterministe de mécanique des fluides
+## TEMPE: température prévue par Météo France pour le lendemain 17h
+## RMH2O: rapport d'humidité
+## NO2: concentration en dioxyde d'azote
+## NO: concentration en monoxyde d'azote
+## STATION: lieu de l'observation (Aix-en-Provence, Rambouillet, Munchhausen, Cadarache et Plan de Cuques)
+## VentMOD: force du vent
+## VentANG: orientation du vent
+
+head(ozone)
+```
+
+<!-- [lien intéressant](http://www.win-vector.com/blog/2017/04/encoding-categorical-variables-one-hot-and-beyond/)-->
+
+Noter  que  nous  avons  dû  transformer toutes  les  informations  au  format
+`numeric`. La  variable `STATION` se  prêterait volontiers à un  recodage plus
+riche&hellip;
+
+* Préparation d'un ensemble d'apprentissage et d'un ensemble de validation.
+
+```{r splitting}
+m <- nrow(ozone)
+val <- sample(1:m, size = round(m/3), replace = FALSE, prob = rep(1/m, m)) 
+ozone.train <- ozone[-val, ]
+ozone.test <- ozone[val, ]
+```
+
+* Régression `xgboost`
+
+Le  nom   `xgboost`  est  inspiré  de   l'expression  &laquo;extreme  gradient
+boosting&raquo; Cet  algorithme d'apprentissage est aujourd'hui  très apprécié
+dans  la  communauté du  &laquo:machine  learning&raquo;.  Vous trouverez  une
+brève  introduction  aux  principes  sur lesquels  cet  algorithme  est  fondé
+[ici](http://xgboost.readthedocs.io/en/latest/model.html). 
+
+Sans finasser&hellip;
+
+```{r xgboost:one}
+suppressMessages(library(xgboost))
+
+get.rmse <- function(fit, newdata, target_var) {
+  ## Convert 'newdata' object to data.frame
+  newdata <- as.data.frame(newdata)
+  # Get feature matrix and labels
+  X <- newdata %>%
+    select(-matches(target_var)) %>% 
+    as.matrix()
+  Y <- newdata[[target_var]]
+  # Compute and return 'rmse'
+  sqrt( mean((Y - predict(fit, X))^2) )
+}
+
+
+ozone.train.X <- select(ozone.train, -NO2) %>% as.matrix
+ozone.train.Y <- ozone.train$NO2
+
+nrounds <- 100
+fit.xgboost.one <- xgboost(data = ozone.train.X, label = ozone.train.Y,
+                           nrounds = nrounds, objective = "reg:linear", print_every = 10)
+
+rmse.test.one <- get.rmse(fit.xgboost.one, ozone.test, "NO2")
+rmse.test.one
+```
+
+Aurions-nous gagné à  jouer sur les paramètres? Ici, nous  passons la variable
+`eta` de sa valeur par défaut, `0.3`, à `0.1`.
+
+```{r xgbosst:two}
+params <- list(booster = "gbtree", objective = "reg:linear", eta = 0.1, gamma = 0,
+               max_depth = 6, min_child_weight = 1, subsample = 1, colsample_bytree = 1)
+
+fit.xgboost.two <- xgboost(data = ozone.train.X, label = ozone.train.Y,
+                           nrounds = nrounds, params = params, print_every = 10)
+
+rmse.test.two <- get.rmse(fit.xgboost.two, ozone.test, "NO2")
+rmse.test.two
+```
+
+Ou bien, aurions-nous gagné à stopper les itérations plus tôt?
+
+```{r xgboost:three}
+params <- list(booster = "gbtree", objective = "reg:linear", eta = 0.3, gamma = 0,
+               max_depth = 6, min_child_weight = 1, subsample = 1, colsample_bytree = 1)
+
+fit.xgboost.cv <- xgb.cv(data = ozone.train.X, label = ozone.train.Y,
+                         nrounds = nrounds, nfold = 5, params = params, print_every = 10,
+                         showsd = TRUE, early.stopping.rounds = 20, maximize = FALSE)
+best.xgboost.count <- which.min(fit.xgboost.cv$evaluation_log$test_rmse_mean)
+fit.xgboost.three <- xgboost(data = ozone.train.X, label = ozone.train.Y,
+                             nrounds = best.xgboost.count, params = params, print_every = 10)
+
+rmse.test.three <- get.rmse(fit.xgboost.three, ozone.test, "NO2")
+rmse.test.three
+```
+
+* Mise en place d'une &laquo;ML pipeline&raquo;
+
+Cette             section             s'inspire             de             [ce
+billet](https://drsimonj.svbtle.com/with-our-powers-combined-xgboost-and-pipelearner)&hellip; 
+
+```{r ML:pipe:one}
+pl.xgboost <- function(data, formula, ...) {
+  data <- as.data.frame(data)
+
+  X_names <- as.character(f_rhs(formula))
+  y_name  <- as.character(f_lhs(formula))
+
+  if (X_names == '.') {
+    X_names <- names(data)[names(data) != y_name]
+  }
+
+  X <- data.matrix(data[, X_names])
+  y <- data[[y_name]]
+
+  xgboost(data = X, label = y, ...)
+}
+
+fit.xgboost.four <- pl.xgboost(ozone.train, NO2 ~ ., nrounds = nrounds, objective = "reg:linear", verbose = 0)
+
+rmse.test.four <- get.rmse(fit.xgboost.four, ozone.test, "NO2")
+rmse.test.four
+```
+
+*  Nous  voilà  enfin  prêts  à  procéder  à  l'évaluation  d'une  variété  de
+paramétrisations de `xgboost` par &laquo;ML pipelining&raquo;
+
+```{r ML:pipe:two}
+suppressMessages(library(pipelearner))
+
+pl <- pipelearner(ozone.train, pl.xgboost, NO2 ~ .,
+                  nrounds = seq(10, 25, 5),
+                  eta = c(.1, .3, .5),
+                  gamma = c(0, 0.1, 0.2),
+                  max_depth = c(4, 6),
+                  verbose = 0)
+
+fits.xgboost <- pl %>% learn()
+
+results <- fits.xgboost %>% 
+  mutate(
+    ## hyperparameters
+    nrounds   = map_dbl(params, "nrounds"),
+    eta       = map_dbl(params, "eta"),
+    max_depth = map_dbl(params, "max_depth"),
+    ## rmse
+    rmse.train = pmap_dbl(list(fit, train, target), get.rmse),
+    rmse.test  = pmap_dbl(list(fit, test,  target), get.rmse)
+  ) %>% 
+  ## Select columns and order rows
+  select(nrounds, eta, max_depth, contains("rmse")) %>% 
+  arrange(desc(rmse.test), desc(rmse.train))
+
+results
+
+```
+
+results <- fits %>% 
+  mutate(
+    # hyperparameters
+    nrounds   = map_dbl(params, "nrounds"),
+    eta       = map_dbl(params, "eta"),
+    max_depth = map_dbl(params, "max_depth"),
+    # Accuracy
+    accuracy_train = pmap_dbl(list(fit, train, target), accuracy),
+    accuracy_test  = pmap_dbl(list(fit, test,  target), accuracy)
+  ) %>% 
+  # Select columns and order rows
+  select(nrounds, eta, max_depth, contains("accuracy")) %>% 
+  arrange(desc(accuracy_test), desc(accuracy_train))
+
+results
+
+[Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
