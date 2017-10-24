@@ -10,7 +10,9 @@ Les notions
 
 -   Ensembles d'apprentissage et de validation
 
--   'Machine-learning pipelines'
+-   «Machine-learning pipelines»
+
+-   Principe de validation croisée
 
 -   Reproductibilité
 
@@ -47,7 +49,7 @@ Une introduction à la régression par 'xgboost'
 set.seed(54321)
 ```
 
--   Mises à disposition par Météo France, ces données sont extraites du site [wikistat](https://github.com/wikistat). Nous souhaitons apprendre à prédire, à partir des données du jour, la concentration d'ozone le lendemain.
+-   Mises à disposition par Météo France, ces données sont extraites du site [wikistat](https://github.com/wikistat). Nous souhaitons apprendre à prédire, à partir des données du jour, la concentration dioxyde d'azote le lendemain.
 
 ``` r
 one_hot <- function(df) {
@@ -113,7 +115,7 @@ ozone.test <- ozone[val, ]
 
 -   Régression `xgboost`
 
-Le nom `xgboost` est inspiré de l'expression «extreme gradient boosting» Cet algorithme d'apprentissage est aujourd'hui très apprécié dans la communauté du &laquo:machine learning». Vous trouverez une brève introduction aux principes sur lesquels cet algorithme est fondé [ici](http://xgboost.readthedocs.io/en/latest/model.html).
+Le nom `xgboost` est inspiré de l'expression «extreme gradient boosting» Cet algorithme d'apprentissage est aujourd'hui très apprécié dans la communauté du «machine learning». Vous trouverez une brève introduction aux principes sur lesquels cet algorithme est fondé [ici](http://xgboost.readthedocs.io/en/latest/model.html).
 
 Sans finasser…
 
@@ -136,7 +138,7 @@ get.rmse <- function(fit, newdata, target_var) {
 ozone.train.X <- select(ozone.train, -NO2) %>% as.matrix
 ozone.train.Y <- ozone.train$NO2
 
-nrounds <- 100
+nrounds <- 50
 fit.xgboost.one <- xgboost(data = ozone.train.X, label = ozone.train.Y,
                            nrounds = nrounds, objective = "reg:linear", print_every = 10)
 ```
@@ -146,19 +148,14 @@ fit.xgboost.one <- xgboost(data = ozone.train.X, label = ozone.train.Y,
     ## [21] train-rmse:0.184687 
     ## [31] train-rmse:0.137011 
     ## [41] train-rmse:0.101266 
-    ## [51] train-rmse:0.065428 
-    ## [61] train-rmse:0.053769 
-    ## [71] train-rmse:0.042062 
-    ## [81] train-rmse:0.027922 
-    ## [91] train-rmse:0.021030 
-    ## [100]    train-rmse:0.015879
+    ## [50] train-rmse:0.067837
 
 ``` r
 rmse.test.one <- get.rmse(fit.xgboost.one, ozone.test, "NO2")
 rmse.test.one
 ```
 
-    ## [1] 0.9810754
+    ## [1] 0.9830637
 
 Aurions-nous gagné à jouer sur les paramètres? Ici, nous passons la variable `eta` de sa valeur par défaut, `0.3`, à `0.1`.
 
@@ -175,19 +172,14 @@ fit.xgboost.two <- xgboost(data = ozone.train.X, label = ozone.train.Y,
     ## [21] train-rmse:0.980167 
     ## [31] train-rmse:0.539510 
     ## [41] train-rmse:0.332184 
-    ## [51] train-rmse:0.233994 
-    ## [61] train-rmse:0.183641 
-    ## [71] train-rmse:0.154095 
-    ## [81] train-rmse:0.134877 
-    ## [91] train-rmse:0.122614 
-    ## [100]    train-rmse:0.116154
+    ## [50] train-rmse:0.241041
 
 ``` r
 rmse.test.two <- get.rmse(fit.xgboost.two, ozone.test, "NO2")
 rmse.test.two
 ```
 
-    ## [1] 1.02734
+    ## [1] 1.045572
 
 Ou bien, aurions-nous gagné à stopper les itérations plus tôt?
 
@@ -200,17 +192,12 @@ fit.xgboost.cv <- xgb.cv(data = ozone.train.X, label = ozone.train.Y,
                          showsd = TRUE, early.stopping.rounds = 20, maximize = FALSE)
 ```
 
-    ## [1]  train-rmse:3.799698+0.136626    test-rmse:3.821138+0.626400 
-    ## [11] train-rmse:0.431261+0.046820    test-rmse:1.513854+0.652663 
-    ## [21] train-rmse:0.165710+0.014164    test-rmse:1.562004+0.659993 
-    ## [31] train-rmse:0.109532+0.009998    test-rmse:1.569076+0.664805 
-    ## [41] train-rmse:0.073094+0.006837    test-rmse:1.570267+0.664585 
-    ## [51] train-rmse:0.048866+0.002317    test-rmse:1.571713+0.663063 
-    ## [61] train-rmse:0.033369+0.003329    test-rmse:1.572273+0.662416 
-    ## [71] train-rmse:0.023395+0.002403    test-rmse:1.572423+0.662509 
-    ## [81] train-rmse:0.017311+0.001902    test-rmse:1.572235+0.662476 
-    ## [91] train-rmse:0.012581+0.001232    test-rmse:1.572238+0.662429 
-    ## [100]    train-rmse:0.009421+0.001441    test-rmse:1.572217+0.662248
+    ## [1]  train-rmse:3.797699+0.121068    test-rmse:3.815394+0.639161 
+    ## [11] train-rmse:0.426928+0.044636    test-rmse:1.609930+0.561910 
+    ## [21] train-rmse:0.164069+0.011360    test-rmse:1.637574+0.564669 
+    ## [31] train-rmse:0.107791+0.011961    test-rmse:1.644937+0.576037 
+    ## [41] train-rmse:0.074014+0.010449    test-rmse:1.645869+0.575922 
+    ## [50] train-rmse:0.052082+0.008001    test-rmse:1.644881+0.576451
 
 ``` r
 best.xgboost.count <- which.min(fit.xgboost.cv$evaluation_log$test_rmse_mean)
@@ -223,6 +210,12 @@ fit.xgboost.three <- xgboost(data = ozone.train.X, label = ozone.train.Y,
 
 ``` r
 rmse.test.three <- get.rmse(fit.xgboost.three, ozone.test, "NO2")
+best.xgboost.count
+```
+
+    ## [1] 11
+
+``` r
 rmse.test.three
 ```
 
@@ -255,7 +248,7 @@ rmse.test.four <- get.rmse(fit.xgboost.four, ozone.test, "NO2")
 rmse.test.four
 ```
 
-    ## [1] 0.9810754
+    ## [1] 0.9830637
 
 -   Nous voilà enfin prêts à procéder à l'évaluation d'une variété de paramétrisations de `xgboost` par «ML pipelining»
 
@@ -263,10 +256,10 @@ rmse.test.four
 suppressMessages(library(pipelearner))
 
 pl <- pipelearner(ozone.train, pl.xgboost, NO2 ~ .,
-                  nrounds = seq(10, 25, 5),
-                  eta = c(.1, .3, .5),
-                  gamma = c(0, 0.1, 0.2),
-                  max_depth = c(4, 6),
+                  nrounds = seq(10, 50, 10),
+                  eta = seq(0.0, 0.3, 0.1),
+                  gamma = seq(0.0, 0.3, 0.1),
+                  max_depth = seq.int(4, 8, 1),
                   verbose = 0)
 ```
 
@@ -280,33 +273,29 @@ fits.xgboost <- pl %>% learn()
 results <- fits.xgboost %>% 
   mutate(
     ## hyperparameters
-    nrounds   = map_dbl(params, "nrounds"),
-    eta       = map_dbl(params, "eta"),
+    nrounds = map_dbl(params, "nrounds"),
+    eta = map_dbl(params, "eta"),
+    gamma = map_dbl(params, "gamma"),
     max_depth = map_dbl(params, "max_depth"),
     ## rmse
     rmse.train = pmap_dbl(list(fit, train, target), get.rmse),
     rmse.test  = pmap_dbl(list(fit, test,  target), get.rmse)
   ) %>% 
   ## Select columns and order rows
-  select(nrounds, eta, max_depth, contains("rmse")) %>% 
+  select(nrounds, eta, gamma, max_depth, contains("rmse")) %>% 
   arrange(desc(rmse.test), desc(rmse.train))
 
-results
+tail(results)
 ```
 
-    ## # A tibble: 72 x 5
-    ##    nrounds   eta max_depth rmse.train rmse.test
-    ##      <dbl> <dbl>     <dbl>      <dbl>     <dbl>
-    ##  1      10   0.1         6   2.054802  3.204319
-    ##  2      10   0.1         4   2.082638  3.191337
-    ##  3      10   0.1         4   2.082638  3.191337
-    ##  4      10   0.1         4   2.082638  3.191337
-    ##  5      10   0.1         6   2.057249  3.178219
-    ##  6      10   0.1         6   2.056468  3.170759
-    ##  7      15   0.1         4   1.416361  2.785399
-    ##  8      15   0.1         4   1.416361  2.785399
-    ##  9      15   0.1         4   1.416407  2.784853
-    ## 10      15   0.1         6   1.373803  2.768126
-    ## # ... with 62 more rows
+    ## # A tibble: 6 x 6
+    ##   nrounds   eta gamma max_depth rmse.train rmse.test
+    ##     <dbl> <dbl> <dbl>     <dbl>      <dbl>     <dbl>
+    ## 1      40   0.3   0.1         4  0.2088132  2.320839
+    ## 2      20   0.3   0.1         4  0.2696244  2.318693
+    ## 3      20   0.3   0.0         4  0.2689565  2.307680
+    ## 4      40   0.3   0.0         4  0.1677334  2.302154
+    ## 5      30   0.3   0.0         4  0.2087297  2.301516
+    ## 6      50   0.3   0.0         4  0.1439119  2.295768
 
 [Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)

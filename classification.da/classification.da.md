@@ -34,7 +34,7 @@ Une introduction à la classification par analyse discriminante
 set.seed(54321)
 ```
 
--   Mises à disposition par Météo France, ces données sont extraites du site [wikistat](https://github.com/wikistat). Nous souhaitons apprendre à prédire, à partir des données du jour, un dépassement du seuil de 150 μg par la concentration d'ozone le lendemain.
+-   Mises à disposition par Météo France, ces données sont extraites du site [wikistat](https://github.com/wikistat). Nous souhaitons apprendre à prédire, à partir des données du jour, un dépassement du seuil de 150 μg par la concentration de dioxyde d'azote le lendemain.
 
 ``` r
 file <- file.path("http://www.math.univ-toulouse.fr/~besse/Wikistat/data", "depSeuil.dat")
