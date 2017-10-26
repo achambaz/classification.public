@@ -27,7 +27,7 @@ A ce jour, les notes suivantes sont disponibles:
 
 [Fluctuation](https://github.com/achambaz/laviemodedemploi/blob/master/fluctuation/fluctuation.md)
 
-[Régression `xgboost`](https://github.com/achambaz/laviemodedemploi/blob/master/regression.xgboost/regression.xgboost.md)
+[Régression par &laquo;extreme gradient boosting&raquo;](https://github.com/achambaz/laviemodedemploi/blob/master/regression.xgboost/regression.xgboost.md)
 
 Chaque note débute par une énumération des notions discutées. 
 

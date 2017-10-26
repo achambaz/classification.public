@@ -1,4 +1,4 @@
-Régression 'xgboost'
+Régression par «exteme gradient boosting»
 ================
 Antoine Chambaz
 23/10/2017
@@ -6,7 +6,7 @@ Antoine Chambaz
 Les notions
 -----------
 
--   Algorithme de régression `xgboost`.
+-   Algorithme de régression par «extreme gradient boosting».
 
 -   Ensembles d'apprentissage et de validation
 
@@ -42,8 +42,8 @@ suppressMessages(library(tidyverse))
 suppressMessages(library(lazyeval))
 ```
 
-Une introduction à la régression par 'xgboost'
-----------------------------------------------
+Une introduction à la régression par «extreme gradient boosting»
+----------------------------------------------------------------
 
 ``` r
 set.seed(54321)
@@ -102,7 +102,9 @@ head(ozone)
     ## #   STATIONRam <dbl>, VentMOD <dbl>, VentANG <dbl>
 
 <!-- [lien intéressant](http://www.win-vector.com/blog/2017/04/encoding-categorical-variables-one-hot-and-beyond/)-->
-Noter que nous avons dû transformer toutes les informations au format `numeric`. La variable `STATION` se prêterait volontiers à un recodage plus riche…
+A quoi la fonction `one_hot` sert-elle? Noter que nous avons dû transformer toutes les informations au format `numeric`.
+
+*Remarque.* La variable `STATION` se prêterait volontiers à un recodage plus riche…
 
 -   Préparation d'un ensemble d'apprentissage et d'un ensemble de validation.
 
@@ -125,12 +127,12 @@ suppressMessages(library(xgboost))
 get.rmse <- function(fit, newdata, target_var) {
   ## Convert 'newdata' object to data.frame
   newdata <- as.data.frame(newdata)
-  # Get feature matrix and labels
+  ## Get feature matrix and labels
   X <- newdata %>%
     select(-matches(target_var)) %>% 
     as.matrix()
   Y <- newdata[[target_var]]
-  # Compute and return 'rmse'
+  ## Compute and return 'rmse'
   sqrt( mean((Y - predict(fit, X))^2) )
 }
 
@@ -221,11 +223,29 @@ rmse.test.three
 
     ## [1] 1.004428
 
--   Mise en place d'une «ML pipeline»
+Mise en place d'une «ML pipeline»
+---------------------------------
 
-Cette section s'inspire de [ce billet](https://drsimonj.svbtle.com/with-our-powers-combined-xgboost-and-pipelearner)…
+Cette section s'inspire de [ce billet](https://drsimonj.svbtle.com/with-our-powers-combined-xgboost-and-pipelearner), & il faudrait trouver une jolie expression française.
+
+Nous commençons par définir les fonctions `r.square` (inspirée de `modelr::rsquare`, mais capable de s'adapter à la présence de nouvelles données) et `pl.xgboost` (une version de `xgboost` se prêtant au «ML pipelining»).
 
 ``` r
+get.params <- function(ll) {
+  sprintf("n=%i,e=%.1f,g=%.1f,m=%i", ll$nrounds, ll$eta, ll$gamma, ll$max_depth)
+}
+get.rsquare <- function(fit, newdata, target_var) {
+  ## Convert 'newdata' object to data.frame
+  newdata <- as.data.frame(newdata)
+  ## Get feature matrix and labels
+  actual <- newdata[[target_var]]
+  X <- newdata %>%
+    select(-matches(target_var)) %>% 
+    as.matrix()
+  residuals <- predict(fit, X) - actual
+  ## Compute and return 'rsquare'
+  1 - (var(residuals, na.rm = TRUE) / var(actual, na.rm = TRUE))
+}
 pl.xgboost <- function(data, formula, ...) {
   data <- as.data.frame(data)
 
@@ -241,14 +261,7 @@ pl.xgboost <- function(data, formula, ...) {
 
   xgboost(data = X, label = y, ...)
 }
-
-fit.xgboost.four <- pl.xgboost(ozone.train, NO2 ~ ., nrounds = nrounds, objective = "reg:linear", verbose = 0)
-
-rmse.test.four <- get.rmse(fit.xgboost.four, ozone.test, "NO2")
-rmse.test.four
 ```
-
-    ## [1] 0.9830637
 
 -   Nous voilà enfin prêts à procéder à l'évaluation d'une variété de paramétrisations de `xgboost` par «ML pipelining»
 
@@ -257,10 +270,11 @@ suppressMessages(library(pipelearner))
 
 pl <- pipelearner(ozone.train, pl.xgboost, NO2 ~ .,
                   nrounds = seq(10, 50, 10),
-                  eta = seq(0.0, 0.3, 0.1),
+                  eta = seq(0.1, 0.3, 0.1),
                   gamma = seq(0.0, 0.3, 0.1),
-                  max_depth = seq.int(4, 8, 1),
-                  verbose = 0)
+                  max_depth = seq.int(2, 6, 1),
+                  verbose = 0) %>%
+  learn_cvpairs(crossv_kfold, k = 5)
 ```
 
     ## Warning: `cross_d()` is deprecated; please use `cross_df()` instead.
@@ -270,32 +284,60 @@ pl <- pipelearner(ozone.train, pl.xgboost, NO2 ~ .,
 ``` r
 fits.xgboost <- pl %>% learn()
 
-results <- fits.xgboost %>% 
+results.xgboost <- fits.xgboost %>% 
   mutate(
-    ## hyperparameters
-    nrounds = map_dbl(params, "nrounds"),
-    eta = map_dbl(params, "eta"),
-    gamma = map_dbl(params, "gamma"),
-    max_depth = map_dbl(params, "max_depth"),
-    ## rmse
+    ## Get hyperparameters
+    # nrounds = map_dbl(params, "nrounds"),
+    # eta = map_dbl(params, "eta"),
+    # gamma = map_dbl(params, "gamma"),
+    # max_depth = map_dbl(params, "max_depth"),
+    negm = map_chr(params, get.params),
+    ## Get rmse
     rmse.train = pmap_dbl(list(fit, train, target), get.rmse),
-    rmse.test  = pmap_dbl(list(fit, test,  target), get.rmse)
-  ) %>% 
-  ## Select columns and order rows
-  select(nrounds, eta, gamma, max_depth, contains("rmse")) %>% 
-  arrange(desc(rmse.test), desc(rmse.train))
+    rmse.test  = pmap_dbl(list(fit, test,  target), get.rmse),
+    ## Get r-square
+    rsquare.train = pmap_dbl(list(fit, train, target), get.rsquare),
+    rsquare.test  = pmap_dbl(list(fit, test, target), get.rsquare)
+  ) %>%
+  group_by(negm) %>%
+  summarise(
+    mrmse.train = mean(rmse.train),
+    mrmse.test = mean(rmse.test),
+    mrsquare.train = mean(rsquare.train),
+    mrsquare.test = mean(rsquare.test),    
+  ) %>%
+  ## Order rows
+  arrange(desc(mrmse.test), desc(mrmse.train))
 
-tail(results)
+tail(results.xgboost)
 ```
 
-    ## # A tibble: 6 x 6
-    ##   nrounds   eta gamma max_depth rmse.train rmse.test
-    ##     <dbl> <dbl> <dbl>     <dbl>      <dbl>     <dbl>
-    ## 1      40   0.3   0.1         4  0.2088132  2.320839
-    ## 2      20   0.3   0.1         4  0.2696244  2.318693
-    ## 3      20   0.3   0.0         4  0.2689565  2.307680
-    ## 4      40   0.3   0.0         4  0.1677334  2.302154
-    ## 5      30   0.3   0.0         4  0.2087297  2.301516
-    ## 6      50   0.3   0.0         4  0.1439119  2.295768
+    ## # A tibble: 6 x 5
+    ##                   negm mrmse.train mrmse.test mrsquare.train mrsquare.test
+    ##                  <chr>       <dbl>      <dbl>          <dbl>         <dbl>
+    ## 1 n=40,e=0.2,g=0.2,m=2   0.6653026   1.510042      0.9739081     0.8587279
+    ## 2 n=40,e=0.2,g=0.3,m=2   0.6631990   1.503548      0.9740841     0.8596357
+    ## 3 n=50,e=0.2,g=0.0,m=2   0.6103823   1.493683      0.9780243     0.8614934
+    ## 4 n=50,e=0.2,g=0.1,m=2   0.6103823   1.493683      0.9780243     0.8614934
+    ## 5 n=50,e=0.2,g=0.2,m=2   0.6103823   1.493683      0.9780243     0.8614934
+    ## 6 n=50,e=0.2,g=0.3,m=2   0.6070488   1.480549      0.9782827     0.8633476
+
+``` r
+fig.one <- results.xgboost %>%
+  ggplot(aes(mrsquare.train, mrsquare.test, color = negm)) +
+  guides(color = FALSE) +
+  geom_point(size = 2) +
+  geom_abline(intercept = 0, slope = 1, color = "grey")
+
+fig.two <- results.xgboost %>%
+  ggplot(aes(mrmse.train, mrmse.test, color = negm)) +
+  guides(color = FALSE) +
+  geom_point(size = 2) +
+  geom_abline(intercept = 0, slope = 1, color = "grey")
+
+multiplot(fig.one, fig.two, cols = 2)
+```
+
+![](img/ML:pipe:three-1.png)
 
 [Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
