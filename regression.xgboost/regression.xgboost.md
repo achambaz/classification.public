@@ -8,7 +8,7 @@ Les notions
 
 -   Algorithme de régression par «extreme gradient boosting».
 
--   Ensembles d'apprentissage et de validation
+-   Ensembles d'apprentissage et de test
 
 -   «Machine-learning pipelines»
 
@@ -106,7 +106,7 @@ A quoi la fonction `one_hot` sert-elle? Noter que nous avons dû transformer tou
 
 *Remarque.* La variable `STATION` se prêterait volontiers à un recodage plus riche…
 
--   Préparation d'un ensemble d'apprentissage et d'un ensemble de validation.
+-   Préparation d'un ensemble d'apprentissage et d'un ensemble de test.
 
 ``` r
 m <- nrow(ozone)
@@ -228,7 +228,7 @@ Mise en place d'une «ML pipeline»
 
 Cette section s'inspire de [ce billet](https://drsimonj.svbtle.com/with-our-powers-combined-xgboost-and-pipelearner), & il faudrait trouver une jolie expression française.
 
-Nous commençons par définir les fonctions `r.square` (inspirée de `modelr::rsquare`, mais capable de s'adapter à la présence de nouvelles données) et `pl.xgboost` (une version de `xgboost` se prêtant au «ML pipelining»).
+-   Nous commençons par définir les fonctions `r.square` (inspirée de `modelr::rsquare`, mais capable de s'adapter à la présence de nouvelles données) et `pl.xgboost` (une version de `xgboost` se prêtant au «ML pipelining»).
 
 ``` r
 get.params <- function(ll) {
@@ -323,7 +323,7 @@ tail(results.xgboost)
     ## 6 nrounds=60,eta=0.5,gamma=0.2,max_depth=2   0.3763394   1.420089
     ## # ... with 2 more variables: mrsquare.train <dbl>, mrsquare.test <dbl>
 
--   Pour conclure, visualisons les différentes mesures de perfomance. En abscisse, celles obtenues sur l'ensemble d'apprentissage; en ordonnée, celles obtenues sur l'ensemble de validation (ordonnée), au sein de la procédure de validation croisée — seules ces dernières sont pertinentes.
+-   Pour conclure, visualisons les différentes mesures de perfomance. En abscisse, celles obtenues sur l'ensemble d'apprentissage; en ordonnée, celles obtenues sur l'ensemble de test (ordonnée), au sein de la procédure de validation croisée — seules ces dernières sont pertinentes.
 
 ``` r
 fig.one <- results.xgboost %>%

@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 * Algorithme de régression par &laquo;extreme gradient boosting&raquo;.
 
-* Ensembles d'apprentissage et de validation
+* Ensembles d'apprentissage et de test
 
 * &laquo;Machine-learning pipelines&raquo;
 
@@ -98,7 +98,7 @@ toutes les informations au format `numeric`.
 *Remarque.* La variable  `STATION` se prêterait volontiers  à un recodage
 plus riche&hellip;
 
-* Préparation d'un ensemble d'apprentissage et d'un ensemble de validation.
+* Préparation d'un ensemble d'apprentissage et d'un ensemble de test.
 
 ```{r splitting}
 m <- nrow(ozone)
@@ -183,7 +183,7 @@ billet](https://drsimonj.svbtle.com/with-our-powers-combined-xgboost-and-pipelea
 &amp; il faudrait trouver une jolie expression française.
 
 
-Nous   commençons  par   définir   les  fonctions   `r.square`  (inspirée   de
+* Nous commençons par définir les fonctions `r.square` (inspirée de
 `modelr::rsquare`,  mais  capable de  s'adapter  à  la présence  de  nouvelles
 données) et  `pl.xgboost` (une  version de `xgboost`  se prêtant  au &laquo;ML
 pipelining&raquo;).
@@ -267,7 +267,7 @@ tail(results.xgboost)
 
 *    Pour  conclure, visualisons  les différentes  mesures de  perfomance.  En
   abscisse,  celles  obtenues  sur l'ensemble  d'apprentissage;  en  ordonnée,
-  celles  obtenues sur  l'ensemble de  validation  (ordonnée), au  sein de  la
+  celles  obtenues sur  l'ensemble de  test  (ordonnée), au  sein de  la
   procédure  de   validation  croisée   &mdash;  seules  ces   dernières  sont
   pertinentes. 
 

@@ -10,7 +10,7 @@ Les notions
 
 -   Courbes ROC
 
--   Ensembles d'apprentissage et de validation
+-   Ensembles d'apprentissage et de test
 
 -   Enrichissement de données
 

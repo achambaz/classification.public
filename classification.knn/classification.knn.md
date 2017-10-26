@@ -8,7 +8,7 @@ Les notions
 
 -   Algorithmes de classification selon les *k* plus proches voisins et selon les voisins pondérés
 
--   Ensembles d'apprentissage et de validation
+-   Ensembles d'apprentissage et de test
 
 -   Interprétation algorithmique de l'entreprise de classification
 
