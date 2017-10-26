@@ -190,7 +190,7 @@ pipelining&raquo;).
 
 ```{r ML:pipe:one}
 get.params <- function(ll) {
-  sprintf("n=%i,e=%.1f,g=%.1f,m=%i", ll$nrounds, ll$eta, ll$gamma, ll$max_depth)
+  sprintf("nrounds=%i,eta=%.1f,gamma=%.1f,max_depth=%i", ll$nrounds, ll$eta, ll$gamma, ll$max_depth)
 }
 get.rsquare <- function(fit, newdata, target_var) {
   ## Convert 'newdata' object to data.frame
@@ -228,10 +228,10 @@ paramétrisations de `xgboost` par &laquo;ML pipelining&raquo;
 suppressMessages(library(pipelearner))
 
 pl <- pipelearner(ozone.train, pl.xgboost, NO2 ~ .,
-                  nrounds = seq(10, 50, 10),
-                  eta = seq(0.1, 0.3, 0.1),
-                  gamma = seq(0.0, 0.3, 0.1),
-                  max_depth = seq.int(2, 6, 1),
+                  nrounds = seq(10, 60, 10),
+                  eta = seq(0.1, 0.5, 0.1),
+                  gamma = seq(0.0, 0.5, 0.1),
+                  max_depth = seq.int(2, 7, 1),
                   verbose = 0) %>%
   learn_cvpairs(crossv_kfold, k = 5)
 
@@ -260,10 +260,16 @@ results.xgboost <- fits.xgboost %>%
     mrsquare.test = mean(rsquare.test),    
   ) %>%
   ## Order rows
-  arrange(desc(mrmse.test), desc(mrmse.train))
+  arrange(desc(mrmse.test))
 
 tail(results.xgboost)
 ```
+
+*    Pour  conclure, visualisons  les différentes  mesures de  perfomance.  En
+  abscisse,  celles  obtenues  sur l'ensemble  d'apprentissage;  en  ordonnée,
+  celles  obtenues sur  l'ensemble de  validation  (ordonnée), au  sein de  la
+  procédure  de   validation  croisée   &mdash;  seules  ces   dernières  sont
+  pertinentes. 
 
 ```{r multiplot, echo = FALSE}
 ## Multiple plot function
@@ -329,6 +335,24 @@ fig.two <- results.xgboost %>%
   geom_abline(intercept = 0, slope = 1, color = "grey")
 
 multiplot(fig.one, fig.two, cols = 2)
+```
+
+D'après  le  résultat de  la  commande  ``tail(results.xgboost)`, le  meilleur
+paramétrage parmi ceux  essayés (identifié selon le  risque quadratique validé
+croisé) correspond à `r tail(results.xgboost, 1)$negm`. En conclusion:
+
+```{r ML:pipe:four}
+eval(parse(text = paste("params <- list(
+booster = \"gbtree\", objective = \"reg:linear\",
+min_child_weight = 1, subsample = 1, colsample_bytree = 1,",
+tail(results.xgboost, 1)$negm,
+")")))
+
+fit.xgboost.best <- xgboost(data = ozone.train.X, label = ozone.train.Y,
+                            nrounds = nrounds, params = params, print_every = 10)
+
+rmse.test.best <- get.rmse(fit.xgboost.best, ozone.test, "NO2")
+rmse.test.best
 ```
 
 [Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)

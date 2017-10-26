@@ -232,7 +232,7 @@ Nous commençons par définir les fonctions `r.square` (inspirée de `modelr::rs
 
 ``` r
 get.params <- function(ll) {
-  sprintf("n=%i,e=%.1f,g=%.1f,m=%i", ll$nrounds, ll$eta, ll$gamma, ll$max_depth)
+  sprintf("nrounds=%i,eta=%.1f,gamma=%.1f,max_depth=%i", ll$nrounds, ll$eta, ll$gamma, ll$max_depth)
 }
 get.rsquare <- function(fit, newdata, target_var) {
   ## Convert 'newdata' object to data.frame
@@ -269,10 +269,10 @@ pl.xgboost <- function(data, formula, ...) {
 suppressMessages(library(pipelearner))
 
 pl <- pipelearner(ozone.train, pl.xgboost, NO2 ~ .,
-                  nrounds = seq(10, 50, 10),
-                  eta = seq(0.1, 0.3, 0.1),
-                  gamma = seq(0.0, 0.3, 0.1),
-                  max_depth = seq.int(2, 6, 1),
+                  nrounds = seq(10, 60, 10),
+                  eta = seq(0.1, 0.5, 0.1),
+                  gamma = seq(0.0, 0.5, 0.1),
+                  max_depth = seq.int(2, 7, 1),
                   verbose = 0) %>%
   learn_cvpairs(crossv_kfold, k = 5)
 ```
@@ -307,20 +307,23 @@ results.xgboost <- fits.xgboost %>%
     mrsquare.test = mean(rsquare.test),    
   ) %>%
   ## Order rows
-  arrange(desc(mrmse.test), desc(mrmse.train))
+  arrange(desc(mrmse.test))
 
 tail(results.xgboost)
 ```
 
     ## # A tibble: 6 x 5
-    ##                   negm mrmse.train mrmse.test mrsquare.train mrsquare.test
-    ##                  <chr>       <dbl>      <dbl>          <dbl>         <dbl>
-    ## 1 n=40,e=0.2,g=0.2,m=2   0.6653026   1.510042      0.9739081     0.8587279
-    ## 2 n=40,e=0.2,g=0.3,m=2   0.6631990   1.503548      0.9740841     0.8596357
-    ## 3 n=50,e=0.2,g=0.0,m=2   0.6103823   1.493683      0.9780243     0.8614934
-    ## 4 n=50,e=0.2,g=0.1,m=2   0.6103823   1.493683      0.9780243     0.8614934
-    ## 5 n=50,e=0.2,g=0.2,m=2   0.6103823   1.493683      0.9780243     0.8614934
-    ## 6 n=50,e=0.2,g=0.3,m=2   0.6070488   1.480549      0.9782827     0.8633476
+    ##                                       negm mrmse.train mrmse.test
+    ##                                      <chr>       <dbl>      <dbl>
+    ## 1 nrounds=50,eta=0.5,gamma=0.4,max_depth=2   0.4281491   1.428653
+    ## 2 nrounds=60,eta=0.5,gamma=0.1,max_depth=2   0.3763972   1.424863
+    ## 3 nrounds=60,eta=0.5,gamma=0.3,max_depth=2   0.3783537   1.424098
+    ## 4 nrounds=50,eta=0.5,gamma=0.2,max_depth=2   0.4211058   1.422060
+    ## 5 nrounds=60,eta=0.5,gamma=0.5,max_depth=2   0.4047537   1.420162
+    ## 6 nrounds=60,eta=0.5,gamma=0.2,max_depth=2   0.3763394   1.420089
+    ## # ... with 2 more variables: mrsquare.train <dbl>, mrsquare.test <dbl>
+
+-   Pour conclure, visualisons les différentes mesures de perfomance. En abscisse, celles obtenues sur l'ensemble d'apprentissage; en ordonnée, celles obtenues sur l'ensemble de validation (ordonnée), au sein de la procédure de validation croisée — seules ces dernières sont pertinentes.
 
 ``` r
 fig.one <- results.xgboost %>%
@@ -339,5 +342,32 @@ multiplot(fig.one, fig.two, cols = 2)
 ```
 
 ![](img/ML:pipe:three-1.png)
+
+D'après le résultat de la commande \``tail(results.xgboost)`, le meilleur paramétrage parmi ceux essayés (identifié selon le risque quadratique validé croisé) correspond à nrounds=60,eta=0.5,gamma=0.2,max\_depth=2. En conclusion:
+
+``` r
+eval(parse(text = paste("params <- list(
+booster = \"gbtree\", objective = \"reg:linear\",
+min_child_weight = 1, subsample = 1, colsample_bytree = 1,",
+tail(results.xgboost, 1)$negm,
+")")))
+
+fit.xgboost.best <- xgboost(data = ozone.train.X, label = ozone.train.Y,
+                            nrounds = nrounds, params = params, print_every = 10)
+```
+
+    ## [1]  train-rmse:3.138997 
+    ## [11] train-rmse:0.968067 
+    ## [21] train-rmse:0.696707 
+    ## [31] train-rmse:0.588219 
+    ## [41] train-rmse:0.507341 
+    ## [50] train-rmse:0.474183
+
+``` r
+rmse.test.best <- get.rmse(fit.xgboost.best, ozone.test, "NO2")
+rmse.test.best
+```
+
+    ## [1] 0.929618
 
 [Retour à la table des matières](https://github.com/achambaz/laviemodedemploi#liens)
