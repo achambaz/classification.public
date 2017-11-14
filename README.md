@@ -29,6 +29,8 @@ A ce jour, les notes suivantes sont disponibles:
 
 [Régression par &laquo;extreme gradient boosting&raquo;](https://github.com/achambaz/laviemodedemploi/blob/master/regression.xgboost/regression.xgboost.md)
 
+[Super Learning](https://github.com/achambaz/laviemodedemploi/blob/master/SuperLearning/SuperLearning.md)
+
 Chaque note débute par une énumération des notions discutées. 
 
 ---
